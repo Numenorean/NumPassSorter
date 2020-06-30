@@ -1,2 +1,2 @@
-# NumPassSorter
-Sort combos in phone:password format
+Run as:
+python3 main.py path/to/combos.txt
