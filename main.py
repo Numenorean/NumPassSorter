@@ -1,4 +1,5 @@
 from tqdm import tqdm
+import subprocess
 import ctypes
 import datetime
 import config
@@ -66,47 +67,60 @@ class Sorter:
                 if code in config.KAZAKHSTAN[operator]:
                     result[1].append(operator)
             return result
+
+    def removeEmptyFiles(self, path):
+        for root, dirs, files in os.walk(path):
+            for f in files:
+                fullname = os.path.join(root, f)
+                try:
+                    if os.path.getsize(fullname) == 0:
+                        print('Удаляю %s' % fullname)
+                        os.remove(fullname)
+                except WindowsError:
+                    continue
+        for root, dirs, files in os.walk(path):
+            if not files and not dirs:
+                os.rmdir(root)
+            
+            
     
     def sort(self):
-        path = f'Результаты/{self.date}/{self.time}'
-        os.makedirs(f'Результаты/{self.date}/{self.time}')
+        path = f'Результаты\\{self.date}\\{self.time}'
+        os.makedirs(f'Результаты\\{self.date}\\{self.time}')
 
-        os.mkdir(path+'/Украина')
-        kyivstar = open(path + '/Украина/Киевстар.txt', 'w')
-        vodafone = open(path + '/Украина/Водафон.txt', 'w')
-        lifecell = open(path + '/Украина/Лайфселл.txt', 'w')
-        threemob = open(path + '/Украина/3моб.txt', 'w')
-        peoplenet = open(path + '/Украина/PEOPLEnet.txt', 'w')
-        ukrtelecom = open(path + '/Украина/Укртелеком.txt', 'w')
-        all_ua = open(path + '/Украина/Все.txt', 'w')
+        os.mkdir(path+'\\Украина')
+        kyivstar = open(path + '\\Украина\\Киевстар.txt', 'w')
+        vodafone = open(path + '\\Украина\\Водафон.txt', 'w')
+        lifecell = open(path + '\\Украина\\Лайфселл.txt', 'w')
+        threemob = open(path + '\\Украина\\3моб.txt', 'w')
+        peoplenet = open(path + '\\Украина\\PEOPLEnet.txt', 'w')
+        ukrtelecom = open(path + '\\Украина\\Укртелеком.txt', 'w')
+        all_ua = open(path + '\\Украина\\Все.txt', 'w')
 
-        os.mkdir(path+'/Россия')
-        beeline = open(path + '/Россия/Билайн.txt', 'w')
-        tele2 = open(path + '/Россия/Теле2.txt', 'w')
-        megafon = open(path + '/Россия/Мегафон.txt', 'w')
-        mts = open(path + '/Россия/МТС.txt', 'w')
-        yota = open(path + '/Россия/Йота.txt', 'w')
-        all_ru = open(path + '/Россия/Все.txt', 'w')
+        os.mkdir(path+'\\Россия')
+        beeline = open(path + '\\Россия\\Билайн.txt', 'w')
+        tele2 = open(path + '\\Россия\\Теле2.txt', 'w')
+        megafon = open(path + '\\Россия\\Мегафон.txt', 'w')
+        mts = open(path + '\\Россия\\МТС.txt', 'w')
+        yota = open(path + '\\Россия\\Йота.txt', 'w')
+        all_ru = open(path + '\\Россия\\Все.txt', 'w')
 
-        os.mkdir(path+'/Казахстан')
-        aktiv = open(path + '/Казахстан/Актив.txt', 'w')
-        beeline_kz = open(path + '/Казахстан/Билайн.txt', 'w')
-        ksell = open(path + '/Казахстан/Кселл.txt', 'w')
-        tele2_kz = open(path + '/Казахстан/Теле2.txt', 'w')
-        all_kz = open(path + '/Казахстан/Все.txt', 'w')
+        os.mkdir(path+'\\Казахстан')
+        aktiv = open(path + '\\Казахстан\\Актив.txt', 'w')
+        beeline_kz = open(path + '\\Казахстан\\Билайн.txt', 'w')
+        ksell = open(path + '\\Казахстан\\Кселл.txt', 'w')
+        tele2_kz = open(path + '\\Казахстан\\Теле2.txt', 'w')
+        all_kz = open(path + '\\Казахстан\\Все.txt', 'w')
 
 
-        unnknown = open(path+'/Неизвестные.txt', 'w')
+        unnknown = open(path+'\\Неизвестные.txt', 'w')
 
+        files = [kyivstar, vodafone, lifecell, threemob, peoplenet, ukrtelecom, all_ua, beeline, tele2, megafon, mts, yota, all_ru, aktiv, beeline_kz, ksell, tele2_kz, all_kz, unnknown]
         print('Получаю количество строк в файле...')
         num_lines = sum(1 for line in open(self.comboPath))
-        if num_lines > 10000:
-            n = 7000
-        else:
-            n = 100
         print('Загружено %s строк\nСортировка...' % num_lines)
 
-        with open(self.comboPath, 'r') as f2:
+        with open(self.comboPath, 'r', encoding='utf-8') as f2:
             for combo in tqdm(f2, total=num_lines):
                 combo_2 = combo
                 combo = self.normalizeCombo(combo)
@@ -163,9 +177,14 @@ class Sorter:
                         tele2_kz.write(combo)
                     all_kz.write(combo)
                 #if d % n == 0:
-                 #   ctypes.windll.kernel32.SetConsoleTitleW('Checked: %s/%s' % (d, num_lines))
+                 #   ctypes.windll.kernel32.SetConsoleTitleW('Checked: %s\\%s' % (d, num_lines))
         #final_time = time.time()-self.ts_start
         #input('Потрачено времени: %s' % datetime.datetime.utcfromtimestamp(final_time).strftime("%H:%M:%S.%f"))
+        print('Удаляю пустые файлы...')
+        for file in files:
+            file.close()
+        self.removeEmptyFiles(os.path.abspath(path))
+        subprocess.Popen('explorer "%s"' % path)
         input()       
 
 
