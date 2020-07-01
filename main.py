@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import ctypes
 import datetime
 import config
@@ -67,7 +68,6 @@ class Sorter:
             return result
     
     def sort(self):
-        n = 1
         path = f'Результаты/{self.date}/{self.time}'
         os.makedirs(f'Результаты/{self.date}/{self.time}')
 
@@ -95,18 +95,23 @@ class Sorter:
         tele2_kz = open(path + '/Казахстан/Теле2.txt', 'w')
         all_kz = open(path + '/Казахстан/Все.txt', 'w')
 
-        all_combos = open(path + '/Все.txt', 'w')
 
         unnknown = open(path+'/Неизвестные.txt', 'w')
 
+        print('Получаю количество строк в файле...')
+        num_lines = sum(1 for line in open(self.comboPath))
+        if num_lines > 10000:
+            n = 7000
+        else:
+            n = 100
+        print('Загружено %s строк\nСортировка...' % num_lines)
+
         with open(self.comboPath, 'r') as f2:
-            for combo in f2:
+            for combo in tqdm(f2, total=num_lines):
                 combo_2 = combo
                 combo = self.normalizeCombo(combo)
                 phone = combo.split(':')[0]
                 info = self.getInfoByPhone(phone)
-                if info:
-                    all_combos.write(combo)
                 if not info:
                     unnknown.write(combo_2)
                 elif info[0] == 'UKRAINE':
@@ -157,11 +162,11 @@ class Sorter:
                     if 'Теле2' in info[1]:
                         tele2_kz.write(combo)
                     all_kz.write(combo)
-                ctypes.windll.kernel32.SetConsoleTitleW('Checked: '+str(n))
-                n += 1
-        final_time = time.time()-self.ts_start
-        input(f'Потрачено времени: {datetime.datetime.utcfromtimestamp(final_time).strftime("%H:%M:%S")}')
-                
+                #if d % n == 0:
+                 #   ctypes.windll.kernel32.SetConsoleTitleW('Checked: %s/%s' % (d, num_lines))
+        #final_time = time.time()-self.ts_start
+        #input('Потрачено времени: %s' % datetime.datetime.utcfromtimestamp(final_time).strftime("%H:%M:%S.%f"))
+        input()       
 
 
 
