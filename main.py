@@ -171,4 +171,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         Sorter(sys.argv[1]).sort()
     else:
-        Sorter(input('Перетащите базу: ')).sort()
+        Sorter(input('Перетащите базу: ').replace('"', '')).sort()
