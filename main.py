@@ -117,7 +117,7 @@ class Sorter:
 
         files = [kyivstar, vodafone, lifecell, threemob, peoplenet, ukrtelecom, all_ua, beeline, tele2, megafon, mts, yota, all_ru, aktiv, beeline_kz, ksell, tele2_kz, all_kz, unnknown]
         print('Получаю количество строк в файле...')
-        num_lines = sum(1 for line in open(self.comboPath))
+        num_lines = sum(1 for line in open(self.comboPath, encoding='utf-8'))
         print('Загружено %s строк\nСортировка...' % num_lines)
 
         with open(self.comboPath, 'r', encoding='utf-8') as f2:
