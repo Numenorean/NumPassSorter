@@ -120,7 +120,7 @@ class Sorter:
         num_lines = sum(1 for line in open(self.comboPath, encoding='utf-8'))
         print('Загружено %s строк\nСортировка...' % num_lines)
 
-        with open(self.comboPath, 'r', encoding='utf-8') as f2:
+        with open(self.comboPath, 'r', errors='ignore') as f2:
             for combo in tqdm(f2, total=num_lines):
                 combo_2 = combo
                 combo = self.normalizeCombo(combo)
